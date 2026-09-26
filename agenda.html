@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitácora — Agendador de Citas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep: #071624;
+    --navy: #0d2436;
+    --navy-panel: #123147;
+    --navy-line: #1d445e;
+    --teal: #2f8f7a;
+    --teal-bright: #4fd8ab;
+    --foam: #d9ece7;
+    --foam-dim: #8fa9a6;
+    --coral: #d97757;
+    --danger: #c9634f;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(47,143,122,0.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(47,143,122,0.10), transparent 55%),
+      var(--navy-deep);
+    color: var(--foam);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3, .brand-word{ font-family:'Space Grotesk', sans-serif; }
+
+  .wrap{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  header.top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .brand svg{ flex-shrink:0; }
+  .brand h1{
+    margin:0;
+    font-size: 1.5rem;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    color:#fff;
+  }
+  .brand p{
+    margin:2px 0 0;
+    font-size:0.85rem;
+    color: var(--foam-dim);
+  }
+
+  .depth-line{
+    height:1px;
+    background: linear-gradient(90deg, transparent, var(--navy-line), transparent);
+    margin: 0 0 32px;
+  }
+
+  .layout{
+    display:grid;
+    grid-template-columns: 340px 1fr;
+    gap: 28px;
+    align-items:start;
+  }
+  @media (max-width: 820px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+
+  .panel{
+    background: linear-gradient(180deg, var(--navy-panel), var(--navy));
+    border: 1px solid var(--navy-line);
+    border-radius: 14px;
+    padding: 24px;
+  }
+
+  .panel h2{
+    margin:0 0 4px;
+    font-size:1.05rem;
+    color:#fff;
+    font-weight:600;
+  }
+  .panel .sub{
+    margin:0 0 20px;
+    font-size:0.82rem;
+    color: var(--foam-dim);
+  }
+
+  label{
+    display:block;
+    font-size:0.78rem;
+    color: var(--foam-dim);
+    margin: 14px 0 6px;
+  }
+  label:first-of-type{ margin-top:0; }
+
+  input, textarea{
+    width:100%;
+    background: var(--navy-deep);
+    border:1px solid var(--navy-line);
+    border-radius:8px;
+    padding:10px 12px;
+    color: var(--foam);
+    font-family:'Inter', sans-serif;
+    font-size:0.9rem;
+    outline:none;
+    transition: border-color 0.15s ease;
+  }
+  input:focus, textarea:focus{
+    border-color: var(--teal-bright);
+  }
+  textarea{ resize:vertical; min-height:60px; }
+
+  .row2{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  button.primary{
+    margin-top:20px;
+    width:100%;
+    background: var(--teal);
+    color:#04140f;
+    border:none;
+    border-radius:8px;
+    padding:11px 16px;
+    font-weight:600;
+    font-size:0.9rem;
+    cursor:pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  button.primary:hover{ background: var(--teal-bright); }
+  button.primary:active{ transform: scale(0.99); }
+
+  .list-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    background: var(--navy-deep);
+    border:1px solid var(--navy-line);
+    border-radius: 8px;
+    padding:3px;
+  }
+  .tabs button{
+    background:transparent;
+    border:none;
+    color: var(--foam-dim);
+    padding:6px 14px;
+    border-radius:6px;
+    font-size:0.8rem;
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+  }
+  .tabs button.active{
+    background: var(--teal);
+    color: #04140f;
+    font-weight:600;
+  }
+
+  .count-badge{
+    font-size:0.78rem;
+    color: var(--foam-dim);
+  }
+
+  .day-group{ margin-bottom: 22px; }
+  .day-group h3{
+    font-size:0.8rem;
+    text-transform: none;
+    color: var(--teal-bright);
+    font-weight:600;
+    margin: 0 0 10px;
+    padding-left: 2px;
+  }
+
+  .appt{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    background: var(--navy-panel);
+    border:1px solid var(--navy-line);
+    border-left: 3px solid var(--teal);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:10px;
+  }
+  .appt.completed{
+    border-left-color: var(--navy-line);
+    opacity: 0.55;
+  }
+  .appt.completed .appt-title{
+    text-decoration: line-through;
+    text-decoration-color: var(--foam-dim);
+  }
+  .appt-time{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:0.95rem;
+    color:#fff;
+    min-width:58px;
+  }
+  .appt-body{ flex:1; min-width:0; }
+  .appt-title{
+    margin:0 0 3px;
+    font-size:0.95rem;
+    font-weight:600;
+    color:#fff;
+  }
+  .appt-note{
+    margin:0;
+    font-size:0.82rem;
+    color: var(--foam-dim);
+    word-wrap: break-word;
+  }
+  .appt-actions{
+    display:flex;
+    gap:8px;
+    flex-shrink:0;
+  }
+  .icon-btn{
+    background:transparent;
+    border:1px solid var(--navy-line);
+    color: var(--foam-dim);
+    width:30px;
+    height:30px;
+    border-radius:7px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .icon-btn:hover{ border-color: var(--teal-bright); color: var(--teal-bright); }
+  .icon-btn.danger:hover{ border-color: var(--danger); color: var(--danger); }
+
+  .empty-state{
+    text-align:center;
+    padding: 60px 20px;
+    color: var(--foam-dim);
+  }
+  .empty-state svg{ opacity:0.5; margin-bottom:14px; }
+  .empty-state p{ margin:0; font-size:0.88rem; }
+
+  footer{
+    text-align:center;
+    margin-top: 50px;
+    font-size: 0.75rem;
+    color: var(--foam-dim);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="19" stroke="#2f8f7a" stroke-width="1.5" opacity="0.5"/>
+        <path d="M20 8v6M20 26v6M8 20h6M26 20h6" stroke="#4fd8ab" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="5" fill="#2f8f7a"/>
+        <circle cx="20" cy="20" r="2" fill="#04140f"/>
+      </svg>
+      <div>
+        <h1>Bitácora</h1>
+        <p>tu agendador de citas</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="depth-line"></div>
+
+  <div class="layout">
+
+    <section class="panel">
+      <h2>Nueva cita</h2>
+      <p class="sub">Registra un nuevo compromiso en tu bitácora</p>
+
+      <label for="f-title">Título</label>
+      <input id="f-title" type="text" placeholder="Ej. Entrevista con Jalasoft">
+
+      <div class="row2">
+        <div>
+          <label for="f-date">Fecha</label>
+          <input id="f-date" type="date">
+        </div>
+        <div>
+          <label for="f-time">Hora</label>
+          <input id="f-time" type="time">
+        </div>
+      </div>
+
+      <label for="f-note">Notas (opcional)</label>
+      <textarea id="f-note" placeholder="Lugar, enlace, recordatorios..."></textarea>
+
+      <button class="primary" id="btn-add">Agendar cita</button>
+    </section>
+
+    <section>
+      <div class="list-header">
+        <div class="tabs">
+          <button data-filter="proximas" class="active">Próximas</button>
+          <button data-filter="pasadas">Pasadas</button>
+          <button data-filter="todas">Todas</button>
+        </div>
+        <span class="count-badge" id="count-badge"></span>
+      </div>
+      <div id="list-container"></div>
+    </section>
+
+  </div>
+
+  <footer>Bitácora — tus citas quedan guardadas en este navegador.</footer>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'bitacora-citas';
+  let citas = [];
+  let filtro = 'proximas';
+
+  function cargar(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      citas = raw ? JSON.parse(raw) : [];
+    }catch(e){ citas = []; }
+  }
+  function guardar(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(citas)); }
+    catch(e){ console.error('No se pudo guardar', e); }
+  }
+
+  function ahoraISO(){
+    const d = new Date();
+    return d.toISOString().slice(0,10);
+  }
+
+  function fechaHoraCita(c){
+    return new Date(c.fecha + 'T' + (c.hora || '00:00'));
+  }
+
+  function formatDiaLargo(fechaStr){
+    const d = new Date(fechaStr + 'T00:00');
+    const opciones = { weekday:'long', day:'numeric', month:'long' };
+    let texto = d.toLocaleDateString('es-ES', opciones);
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+  }
+
+  function render(){
+    const cont = document.getElementById('list-container');
+    const now = new Date();
+
+    let filtradas = citas.filter(c => {
+      const fh = fechaHoraCita(c);
+      if(filtro === 'proximas') return fh >= now && !c.completada;
+      if(filtro === 'pasadas') return fh < now || c.completada;
+      return true;
+    });
+
+    filtradas.sort((a,b) => fechaHoraCita(a) - fechaHoraCita(b));
+    if(filtro === 'pasadas') filtradas.reverse();
+
+    document.getElementById('count-badge').textContent =
+      filtradas.length + (filtradas.length === 1 ? ' cita' : ' citas');
+
+    if(filtradas.length === 0){
+      cont.innerHTML = `
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="22" stroke="#8fa9a6" stroke-width="1.5"/>
+            <path d="M24 14v10l7 4" stroke="#8fa9a6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p>No hay citas en esta vista todavía.</p>
+        </div>`;
+      return;
+    }
+
+    let html = '';
+    let grupoActual = null;
+
+    filtradas.forEach(c => {
+      if(c.fecha !== grupoActual){
+        if(grupoActual !== null) html += '</div>';
+        grupoActual = c.fecha;
+        html += `<div class="day-group"><h3>${formatDiaLargo(c.fecha)}</h3>`;
+      }
+      const hora = c.hora ? c.hora : '—';
+      html += `
+        <div class="appt ${c.completada ? 'completed' : ''}">
+          <div class="appt-time">${hora}</div>
+          <div class="appt-body">
+            <p class="appt-title">${escapeHtml(c.titulo)}</p>
+            ${c.nota ? `<p class="appt-note">${escapeHtml(c.nota)}</p>` : ''}
+          </div>
+          <div class="appt-actions">
+            <button class="icon-btn" title="Marcar hecha" onclick="bitacora.toggle('${c.id}')">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="icon-btn danger" title="Eliminar" onclick="bitacora.eliminar('${c.id}')">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6.5 4V2.5h3V4M4.5 4l.5 9.5h6l.5-9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>`;
+    });
+    html += '</div>';
+    cont.innerHTML = html;
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function agregar(){
+    const titulo = document.getElementById('f-title').value.trim();
+    const fecha = document.getElementById('f-date').value;
+    const hora = document.getElementById('f-time').value;
+    const nota = document.getElementById('f-note').value.trim();
+
+    if(!titulo || !fecha){
+      alert('Por favor completa al menos el título y la fecha.');
+      return;
+    }
+
+    citas.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+      titulo, fecha, hora, nota,
+      completada: false
+    });
+    guardar();
+
+    document.getElementById('f-title').value = '';
+    document.getElementById('f-date').value = '';
+    document.getElementById('f-time').value = '';
+    document.getElementById('f-note').value = '';
+
+    render();
+  }
+
+  function toggle(id){
+    const c = citas.find(x => x.id === id);
+    if(c){ c.completada = !c.completada; guardar(); render(); }
+  }
+
+  function eliminar(id){
+    citas = citas.filter(x => x.id !== id);
+    guardar();
+    render();
+  }
+
+  document.getElementById('btn-add').addEventListener('click', agregar);
+  document.querySelectorAll('.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filtro = btn.dataset.filter;
+      render();
+    });
+  });
+  document.getElementById('f-date').value = ahoraISO();
+
+  cargar();
+  render();
+
+  window.bitacora = { toggle, eliminar };
+})();
+</script>
+</body>
+</html>
